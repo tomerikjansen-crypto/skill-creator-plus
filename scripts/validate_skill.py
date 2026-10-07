@@ -118,14 +118,22 @@ LEVEL_ORDER = {"ERROR": 0, "WARN": 1, "NOTE": 2}
 
 FIRST_PERSON_RE = re.compile(
     r"(?<![\w'])(?:I|[Ww]e)\s+(?:can|will|help|am|could|would)\b"
-    r"|(?<![\w'])(?:I'm|I'll|I've|[Ww]e'll|[Ww]e're)(?![\w'])")
-SECOND_PERSON_RE = re.compile(r"\byou\s+(?:can|could|will|should|may|might)\b|\byou'll\b", re.I)
+    r"|(?<![\w'])(?:I'm|I'll|I've|[Ww]e'll|[Ww]e're)(?![\w'])"
+    r"|\b[Jj]eg (?:kan|vil|hjelper)\b|\b[Vv]i (?:kan|vil|hjelper)\b")
+SECOND_PERSON_RE = re.compile(
+    r"\byou\s+(?:can|could|will|should|may|might)\b|\byou'll\b"
+    r"|\bdu (?:kan|vil|bør|skal)\b", re.I)
+# English cues first, then the Norwegian ones skills in this library use
+# ("Bruk når", "Brukes ved", "Aktiveres med /x", "når brukeren").
 WHEN_CUE_RE = re.compile(
     r"\buse (?:it |this |this skill |them )?(?:when|whenever|for|if|on|to)\b"
     r"|\bwhen (?:the |a )?(?:user|users|you|someone|asked|working|dealing|handling|editing"
     r"|reviewing|creating|writing|building)\b"
     r"|\bwhenever\b|\btrigger(?:s|ed)? (?:on|when|by|for)\b|\binvoke[sd]? (?:when|for|on)\b"
-    r"|\bactivates? (?:when|for|on)\b|\bfor (?:requests|questions|tasks) (?:about|like|involving|that)\b",
+    r"|\bactivates? (?:when|for|on)\b|\bfor (?:requests|questions|tasks) (?:about|like|involving|that)\b"
+    r"|\bbruk(?:es)? (?:den |denne |skillen )?(?:når|ved|for|hvis|til)\b"
+    r"|\bnår (?:brukeren|du|noen|det)\b|\baktiveres? (?:ved|når|med|av)\b"
+    r"|\b(?:utløses|trigges) (?:av|ved|på)\b|\bved (?:spørsmål|«|\"|/)",
     re.I)
 XML_TAG_RE = re.compile(r"<\s*/?\s*[A-Za-z][\w:-]*(?:\s[^<>]*)?/?>")
 MONTHS = (r"(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?"
@@ -147,15 +155,26 @@ REASONING_ECHO_RE = re.compile(
     r"|\bthink (?:out loud|aloud)\b"
     r"|<(?:thinking|reasoning|scratchpad|inner_monologue)>",
     re.I)
-SHOUT_RE = re.compile(r"\b(?:CRITICAL|MUST|ALWAYS|NEVER)\b")
+SHOUT_RE = re.compile(r"\b(?:CRITICAL|MUST|ALWAYS|NEVER|KRITISK|ALDRI|ALLTID|IKKE|OBLIGATORISK)\b")
 HOOK_HINT_RE = re.compile(
     r"\b(?:must always|every (?:single )?time|without exception|no exceptions|before every|after every)\b",
     re.I)
 GO_BACK_RE = re.compile(
     r"\b(?:return|go back|loop back|jump back|back) to (?:step|stage|phase)\b"
-    r"|\brepeat (?:from|until|steps?)\b|\bstart again from\b", re.I)
+    r"|\brepeat (?:from|until|steps?)\b|\bstart again from\b"
+    r"|\btilbake til (?:steg|trinn|fase|punkt)\b|\bgjenta (?:fra|steg|trinn)\b"
+    r"|\bstart (?:på nytt|om igjen) fra\b|\bkjør (?:\S+\s+){0,3}på nytt\b", re.I)
 CHECKBOX_RE = re.compile(r"^\s*[-*]\s+\[[ xX]\]\s")
 TODO_RE = re.compile(r"\b(?:TODO|FIXME)\b")
+# A quoted or guillemet-wrapped TODO is a word the skill talks about (a checklist
+# item such as 'no "TODO" left in the output'), not unfinished text.
+QUOTED_WORD_RE = re.compile('"[^"\\n]{1,40}"|\'[^\'\\n]{1,40}\'|«[^»\\n]{1,40}»|' + chr(0x201C)
+                            + "[^" + chr(0x201D) + "\\n]{1,40}" + chr(0x201D))
+
+
+def unfinished(text):
+    """True when TODO/FIXME appears outside quotes."""
+    return bool(TODO_RE.search(QUOTED_WORD_RE.sub(" ", text)))
 TODO_COMMENT_RE = re.compile(r"(?:#|//|/\*|<!--)\s*(?:TODO|FIXME)\b")
 PLACEHOLDER_RE = re.compile(r"\[FILL:")
 WIN_PATH_RE = re.compile(
@@ -849,7 +868,7 @@ def check_frontmatter(rep, folder_name, fields):
         if PLACEHOLDER_RE.search(desc):
             rep.add("WARN", "CT9", "SKILL.md", dl, "description still holds a [FILL: ...] placeholder from the "
                     "scaffold. Replace it before sharing.")
-        if TODO_RE.search(desc):
+        if unfinished(desc):
             rep.add("ERROR", "CT9", "SKILL.md", dl, "description contains TODO or FIXME.")
     return manual_only
 
@@ -1108,7 +1127,7 @@ def validate(root, label, ban_em_dash=False):
             rep.add("NOTE", "CT3", r, [t[0] for t in dates], "%d dated marker(s) such as %s. If a date stands in "
                     "for a rule's reason, write the reason instead; dates can sit in an '## Old patterns' "
                     "section." % (len(dates), dates[0][1]))
-        todos = [n for n, x in enumerate(prose, 1) if TODO_RE.search(x)]
+        todos = [n for n, x in enumerate(prose, 1) if unfinished(x)]
         if todos:
             rep.add("ERROR", "CT9", r, todos, "TODO or FIXME left in the skill. Finish or delete it before "
                     "sharing.")

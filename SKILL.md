@@ -13,7 +13,7 @@ Audits, builds and improves skills so Claude takes the same process on each run.
 1. **Report before you change.** Start from evidence: the validator's output and a full read of the skill. In AUDIT, edit nothing until the user picks which findings to fix, because a skill change alters each future run and the user owns that call. A direct request to fix a named problem is already that approval.
 2. **Absorb, don't layer.** Fold new guidance into the rule it refines and delete what it replaces. A good edit usually leaves the skill shorter. Write the reason, not the date, so a later editor can tell whether the rule still holds.
 3. **Test before you delete.** Newer models often do better with fewer instructions, but only a with-skill and without-skill run proves a line is dead weight. Method: references/testing.md, "Test before you delete".
-4. **The validator is the floor.** `scripts/validate_skill.py` checks what a script can check. The judgment rules in references/audit-checklist.md need a careful read.
+4. **The validator is the floor.** `scripts/validate_skill.py` checks what a script can check about the text. Whether the text is true where the skill runs (paths, formats, guards) and the judgment rules in references/audit-checklist.md need a careful read.
 
 ## Pick the mode
 
@@ -44,7 +44,7 @@ Audit progress:
 
 **Step 2. Read the skill.** All of it: SKILL.md, each reference file, each script. Done when you can name the skill's job, its branches and what every file is for.
 
-**Step 3. Mark every rule.** Open references/audit-checklist.md. Script rules take the validator's result; read rules need evidence you can cite as file and line. Done when no rule is unmarked.
+**Step 3. Mark every rule.** Open references/audit-checklist.md. Script rules take the validator's result; read rules need evidence you can cite as file and line, and CT11 needs that evidence from disk, not from the text. For a skill in daily use, start the second reader described there before you write. Done when no rule is unmarked.
 
 **Step 4. Write the report** in the format at the end of the checklist: the table with fails first, the changes ranked by impact, then anything that needs the user's decision. The worked example in examples/ shows the bar.
 

@@ -7,7 +7,7 @@ The single list of rules this skill enforces. AUDIT marks every rule pass, fail 
 - Frontmatter and naming (FM1 to FM5)
 - Description (DS1 to DS4)
 - Structure (ST1 to ST7)
-- Content (CT1 to CT10)
+- Content (CT1 to CT11)
 - Workflows (WF1 to WF4)
 - Scripts and packages (SC1 to SC5)
 - Newer models (NM1 to NM5)
@@ -24,6 +24,8 @@ The single list of rules this skill enforces. AUDIT marks every rule pass, fail 
 - **Check: script + read.** The validator flags candidates. Read each one in context and decide. A pattern match inside a quoted example is not a failure.
 - **Check: read.** Judgment. Cite the file and line that shows the pass or the fail. "Looks fine" is not evidence.
 - **Not applicable (N/A)** only when the rule cannot apply, for example SC1 to SC5 in a skill with no scripts. Say why in the evidence column.
+- **Second reader.** For a skill in daily use or with consequences (it commits, moves files, routes work), start a fresh-context agent on the same checklist and the same files before you write your table, without showing it your findings. Why: the first audit of this skill's own library found that one reader marked style rules and missed every finding that changed behaviour; the fresh reader found them. Merge, and verify each of its fact findings on disk before it enters the report.
+- **The validator's word patterns** cover English and the Norwegian cues used here. A DS2, DS3, NM4 or WF1 hit in another language, or a CT9 hit on a quoted word, is a candidate to read, not a fail.
 
 Source codes: P = Anthropic's skill authoring best practices. CC = Claude Code skills docs. HK = Claude Code hooks docs. F5, O55, S55 = the prompting guides for Claude Fable 5, Opus 5.5 and Sonnet 5.5. ADV = advice from practice, not an Anthropic rule. Links are under Sources.
 
@@ -64,6 +66,7 @@ Source codes: P = Anthropic's skill authoring best practices. CC = Claude Code s
 - **CT8 MCP tools named in full.** `ServerName:tool_name`. Why: with several servers connected, a bare tool name may not be found. Check: read. Source: P.
 - **CT9 Nothing unfinished.** No `TODO`, `FIXME` or scaffold placeholders. Check: script. Source: ADV.
 - **CT10 One rule, one place.** No rule repeated across files. Fold new guidance into the rule it refines and delete what it replaces. Why: copies drift apart, and each repeat raises the cost of reading. Check: read. Source: ADV.
+- **CT11 Facts hold in the environment.** Every path, tool name, file or frontmatter format the skill reads, command it runs and claim about how Claude Code or a plugin behaves is checked where the skill runs: the file exists (Glob, `stat`), the format is what the producing tool writes today (its installed references, not memory), the command passes the guards of the session type it names (a worktree session refuses loops and `$(...)`). Why: a skill audits clean as text and still routes work wrong when the thing it reads changed shape; the text rules above cannot see that. Check: read + verify on disk, one line of evidence per fact. Source: ADV.
 
 ## Workflows
 
@@ -116,6 +119,7 @@ Name the failure in the proposed change, so the user sees the pattern and not on
 - **No-op:** a line the model already obeys by default (CT1, NM1). Delete the sentence.
 - **Duplication:** one meaning in two places (CT10). Keep one.
 - **Sediment:** stale layers kept because removing felt risky (CT3, CT10). Absorb into the principle above them.
+- **Drift:** the environment moved and the skill did not: a renamed root, a format a tool stopped writing, a command a new guard refuses (CT11). Rewrite against what is there now.
 - **Sprawl:** long even though every line is live (ST1, ST3). Move detail behind links, split by branch.
 - **Premature completion:** steps end vaguely, so the agent rushes (WF1). Sharpen the "done when".
 
