@@ -7,7 +7,7 @@ The single list of rules this skill enforces. AUDIT marks every rule pass, fail 
 - Frontmatter and naming (FM1 to FM5)
 - Description (DS1 to DS4)
 - Structure (ST1 to ST7)
-- Content (CT1 to CT11)
+- Content (CT1 to CT12)
 - Workflows (WF1 to WF4)
 - Scripts and packages (SC1 to SC5)
 - Newer models (NM1 to NM5)
@@ -66,7 +66,8 @@ Source codes: P = Anthropic's skill authoring best practices. CC = Claude Code s
 - **CT8 MCP tools named in full.** `ServerName:tool_name`. Why: with several servers connected, a bare tool name may not be found. Check: read. Source: P.
 - **CT9 Nothing unfinished.** No `TODO`, `FIXME` or scaffold placeholders. Check: script. Source: ADV.
 - **CT10 One rule, one place.** No rule repeated across files. Fold new guidance into the rule it refines and delete what it replaces. Why: copies drift apart, and each repeat raises the cost of reading. Check: read. Source: ADV.
-- **CT11 Facts hold in the environment.** Every path, tool name, file or frontmatter format the skill reads, command it runs and claim about how Claude Code or a plugin behaves is checked where the skill runs: the file exists (Glob, `stat`), the format is what the producing tool writes today (its installed references, not memory), the command passes the guards of the session type it names (a worktree session refuses loops and `$(...)`). Why: a skill audits clean as text and still routes work wrong when the thing it reads changed shape; the text rules above cannot see that. Check: read + verify on disk, one line of evidence per fact. Source: ADV.
+- **CT11 Facts hold in the environment.** Every path, tool name, file or frontmatter format the skill reads, command it runs and claim about how Claude Code or a plugin behaves is checked where the skill runs: the file exists (Glob, `stat`), the format is what the producing tool writes today (its installed references, not memory), the command passes the guards of the session type it names (a worktree session refuses loops and `$(...)`), and a status or return value means what the skill says it means (read the handler: `status: ok` with an id can still mean "existing item found, reminder not set"). Why: a skill audits clean as text and still routes work wrong when the thing it reads changed shape; the text rules above cannot see that. Check: read + verify on disk, one line of evidence per fact. Source: ADV.
+- **CT12 Callers and callees checked.** The skill's behaviour is the skill plus what calls it and what it calls. List both (`grep` the skill name across skills, commands and agents; follow every "read X and follow it"), and check three things: the caller reaches this skill in every case it should (a caller that skips it when no project is active silently drops the code branch), a callee does not write or confirm on its own where this skill promises to do it later (double writes, approval given twice), and the entry Claude Code actually registers is the one you audited (a `commands/x.md` that reads `skills/x.md` is the skill; the file it reads is loaded by `Read` and is not re-attached after compaction). Why: in the first two audits of this library, every finding that changed real data lived at a boundary, not inside the file. Check: read callers and callees, cite file and line. Source: ADV.
 
 ## Workflows
 

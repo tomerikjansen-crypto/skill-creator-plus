@@ -42,7 +42,7 @@ Audit progress:
 
 **Step 1. Run the validator.** `python3 scripts/validate_skill.py <skill-folder>` for one skill, or `--all <folder>` for a library; then audit in full the skills the user picks, by default the five with the most errors. Add `--json` to parse the results. Done when you have output for every skill in scope.
 
-**Step 2. Read the skill.** All of it: SKILL.md, each reference file, each script. Done when you can name the skill's job, its branches and what every file is for.
+**Step 2. Read the skill.** All of it: SKILL.md, each reference file, each script, and the files that call it or that it tells Claude to follow (CT12). Done when you can name the skill's job, its branches, what every file is for, and who hands work to it.
 
 **Step 3. Mark every rule.** Open references/audit-checklist.md. Script rules take the validator's result; read rules need evidence you can cite as file and line, and CT11 needs that evidence from disk, not from the text. For a skill in daily use, start the second reader described there before you write. Done when no rule is unmarked.
 
